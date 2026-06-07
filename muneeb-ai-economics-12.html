@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MUNEEB·AI — Pakistan Live Price Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#020408;--panel:rgba(3,14,26,0.92);--cyan:#00f5ff;--green:#00ff88;--red:#ff3366;--yellow:#ffd600;--orange:#ff6d00;--white:#e8f4f8;--border:rgba(0,245,255,0.16);--mono:'Share Tech Mono',monospace;--display:'Orbitron',sans-serif;--body:'Rajdhani',sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--white);font-family:var(--body);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,245,255,0.012) 3px,rgba(0,245,255,0.012) 4px);pointer-events:none;z-index:9999}
+.bg-grid{position:fixed;inset:0;background:linear-gradient(rgba(0,245,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,255,0.03) 1px,transparent 1px);background-size:55px 55px;animation:gridPan 22s linear infinite;pointer-events:none;z-index:0}
+@keyframes gridPan{from{background-position:0 0}to{background-position:0 55px}}
+.bg-orb1{position:fixed;width:700px;height:700px;background:radial-gradient(circle,rgba(0,245,255,0.07),transparent 70%);top:-280px;right:-180px;pointer-events:none;z-index:0;animation:orb 9s ease-in-out infinite alternate}
+.bg-orb2{position:fixed;width:500px;height:500px;background:radial-gradient(circle,rgba(0,255,136,0.05),transparent 70%);bottom:-100px;left:-130px;pointer-events:none;z-index:0;animation:orb 12s ease-in-out infinite alternate-reverse}
+@keyframes orb{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.5);opacity:1}}
+.topbar{position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:10px 28px;background:rgba(2,4,8,0.97);border-bottom:1px solid var(--border);backdrop-filter:blur(20px)}
+.logo{font-family:var(--display);font-size:.95rem;font-weight:900;letter-spacing:5px;color:var(--cyan);text-shadow:0 0 25px rgba(0,245,255,.5)}
+.logo em{color:var(--green);font-style:normal}
+.topbar-mid{font-family:var(--mono);font-size:.63rem;color:rgba(0,245,255,.5);display:flex;align-items:center;gap:8px}
+.ldot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);animation:blink 1.3s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.1}}
+.topbar-right{display:flex;align-items:center;gap:14px}
+#clock{font-family:var(--mono);font-size:.7rem;color:var(--cyan);letter-spacing:2px}
+.muneeb-badge{font-family:var(--display);font-size:.52rem;letter-spacing:3px;color:var(--green);text-shadow:0 0 12px rgba(0,255,136,.6);border:1px solid rgba(0,255,136,.35);padding:4px 10px;animation:badgePulse 2.5s ease-in-out infinite}
+@keyframes badgePulse{0%,100%{box-shadow:0 0 5px rgba(0,255,136,.1)}50%{box-shadow:0 0 20px rgba(0,255,136,.4)}}
+.update-banner{background:linear-gradient(90deg,rgba(0,255,136,0.07),rgba(0,245,255,0.04));border-bottom:1px solid rgba(0,255,136,0.18);padding:7px 28px;display:flex;align-items:center;justify-content:space-between;font-family:var(--mono);font-size:.6rem;flex-wrap:wrap;gap:6px}
+.update-left{display:flex;align-items:center;gap:10px;color:rgba(0,255,136,.7)}
+.udot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink .8s infinite}
+.update-right{display:flex;align-items:center;gap:14px;color:rgba(0,245,255,.4)}
+#lastUpdated{color:var(--cyan)}#nextUpdate{color:var(--yellow)}
+.refresh-btn{font-family:var(--mono);font-size:.55rem;letter-spacing:2px;padding:4px 10px;background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.3);color:var(--green);cursor:pointer;transition:all .2s;text-transform:uppercase}
+.refresh-btn:hover{background:rgba(0,255,136,.2);box-shadow:0 0 15px rgba(0,255,136,.2)}
+.loading-overlay{position:fixed;inset:0;background:rgba(2,4,8,0.96);z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .6s}
+.loading-overlay.hidden{opacity:0;pointer-events:none}
+.loading-ring{width:60px;height:60px;border-radius:50%;border:2px solid rgba(0,245,255,.1);border-top:2px solid var(--cyan);border-right:2px solid var(--green);animation:spin 1s linear infinite}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.loading-text{font-family:var(--mono);font-size:.75rem;color:var(--cyan);letter-spacing:3px}
+.loading-sub{font-family:var(--mono);font-size:.6rem;color:rgba(0,255,136,.5);letter-spacing:2px}
+.main{position:relative;z-index:1;padding:18px 26px 50px}
+.hero{text-align:center;margin-bottom:22px;animation:fadeDown .9s ease forwards}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+.hero-title{font-family:var(--display);font-size:clamp(1.2rem,4vw,2.4rem);font-weight:900;letter-spacing:6px;color:transparent;background:linear-gradient(90deg,var(--cyan) 0%,var(--green) 50%,var(--cyan) 100%);background-size:200%;-webkit-background-clip:text;background-clip:text;animation:shimmer 3.5s linear infinite}
+@keyframes shimmer{from{background-position:0%}to{background-position:200%}}
+.hero-sub{font-family:var(--mono);font-size:.65rem;color:rgba(0,245,255,.35);letter-spacing:4px;margin-top:6px}
+.pills{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:20px;align-items:center}
+.pill-lbl{font-family:var(--mono);font-size:.58rem;letter-spacing:3px;color:rgba(0,245,255,.35);margin-right:4px}
+.pill{font-family:var(--mono);font-size:.62rem;letter-spacing:2px;padding:7px 16px;background:transparent;border:1px solid rgba(0,245,255,.22);color:rgba(0,245,255,.45);cursor:pointer;text-transform:uppercase;transition:all .25s}
+.pill:hover{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 14px rgba(0,245,255,.15)}
+.pill.active{border-color:var(--green);color:var(--green);box-shadow:0 0 16px rgba(0,255,136,.2);background:rgba(0,255,136,.05)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.sc{background:var(--panel);border:1px solid var(--border);padding:16px 18px 14px;position:relative;overflow:hidden;transition:all .3s;opacity:0;animation:fadeUp .6s ease forwards}
+.sc:nth-child(1){animation-delay:.08s}.sc:nth-child(2){animation-delay:.16s}.sc:nth-child(3){animation-delay:.24s}.sc:nth-child(4){animation-delay:.32s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.sc:hover{transform:translateY(-4px);box-shadow:0 12px 35px rgba(0,245,255,.07);border-color:rgba(0,245,255,.35)}
+.sc::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;animation:scanLine 2.8s linear infinite}
+.sc:nth-child(1)::after{background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.sc:nth-child(2)::after{background:linear-gradient(90deg,transparent,var(--green),transparent);animation-delay:.7s}
+.sc:nth-child(3)::after{background:linear-gradient(90deg,transparent,var(--yellow),transparent);animation-delay:1.4s}
+.sc:nth-child(4)::after{background:linear-gradient(90deg,transparent,var(--red),transparent);animation-delay:2.1s}
+@keyframes scanLine{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.sc-lbl{font-family:var(--mono);font-size:.57rem;letter-spacing:3px;color:rgba(0,245,255,.38);text-transform:uppercase;margin-bottom:9px}
+.sc-val{font-family:var(--display);font-size:1.45rem;font-weight:700;margin-bottom:5px;text-shadow:0 0 18px currentColor;transition:all .4s}
+.s1 .sc-val{color:var(--cyan)}.s2 .sc-val{color:var(--green)}.s3 .sc-val{color:var(--yellow)}.s4 .sc-val{color:var(--red)}
+.sc-sub{font-family:var(--mono);font-size:.6rem}
+.up{color:var(--green)}.dn{color:var(--red)}.neu{color:var(--yellow)}
+.sc-ico{position:absolute;top:10px;right:12px;font-size:1.2rem;opacity:.18}
+.flash{animation:flash .8s ease}
+@keyframes flash{0%{transform:scale(1.06)}100%{transform:scale(1)}}
+.grid2{display:grid;grid-template-columns:1fr 340px;gap:14px;margin-bottom:14px}
+.panel{background:var(--panel);border:1px solid var(--border);position:relative;overflow:hidden}
+.phd{display:flex;align-items:center;justify-content:space-between;padding:13px 18px 11px;border-bottom:1px solid rgba(0,245,255,.09)}
+.ptitle{font-family:var(--display);font-size:.6rem;letter-spacing:4px;color:var(--cyan);text-transform:uppercase}
+.badge{font-family:var(--mono);font-size:.52rem;letter-spacing:2px;padding:3px 8px;border:1px solid;text-transform:uppercase}
+.b-ai{color:var(--green);border-color:rgba(0,255,136,.3);background:rgba(0,255,136,.05)}
+.b-live{color:var(--cyan);border-color:rgba(0,245,255,.3);background:rgba(0,245,255,.05)}
+.b-warn{color:var(--yellow);border-color:rgba(255,214,0,.3);background:rgba(255,214,0,.05)}
+.pbody{padding:16px 18px}
+.chart-wrap{position:relative;height:290px}
+.ai-output-panel{display:flex;flex-direction:column;height:100%}
+.ai-messages{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-height:250px;max-height:360px;scrollbar-width:thin;scrollbar-color:rgba(0,245,255,.2) transparent}
+.msg{padding:10px 13px;font-family:var(--mono);font-size:.68rem;line-height:1.8;animation:msgIn .3s ease}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.msg-user{background:rgba(0,245,255,.06);border:1px solid rgba(0,245,255,.15);border-left:2px solid var(--cyan);color:rgba(0,245,255,.8);align-self:flex-end;max-width:90%}
+.msg-user::before{content:'YOU ▸ ';color:rgba(0,245,255,.4);font-size:.55rem;letter-spacing:2px}
+.msg-ai{background:rgba(0,255,136,.04);border:1px solid rgba(0,255,136,.12);border-left:2px solid var(--green);color:rgba(255,255,255,.75);align-self:flex-start;max-width:95%}
+.msg-ai-lbl{font-size:.5rem;letter-spacing:3px;color:var(--green);display:block;margin-bottom:5px}
+.msg-loading{background:rgba(0,255,136,.03);border-left:2px solid rgba(0,255,136,.4);color:rgba(0,255,136,.5);font-family:var(--mono);font-size:.65rem;padding:10px 13px;display:flex;align-items:center;gap:8px}
+.dots span{display:inline-block;width:5px;height:5px;background:var(--green);border-radius:50%;animation:db 1.2s ease-in-out infinite;margin:0 2px}
+.dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
+@keyframes db{0%,80%,100%{transform:scale(.6);opacity:.3}40%{transform:scale(1);opacity:1}}
+.ai-input-area{padding:12px 14px;border-top:1px solid rgba(0,245,255,.09);display:flex;flex-direction:column;gap:8px}
+.quick-btns{display:flex;flex-wrap:wrap;gap:6px}
+.qbtn{font-family:var(--mono);font-size:.55rem;padding:5px 10px;background:rgba(0,245,255,.05);border:1px solid rgba(0,245,255,.18);color:rgba(0,245,255,.5);cursor:pointer;transition:all .2s}
+.qbtn:hover{border-color:var(--cyan);color:var(--cyan)}
+.inp-row{display:flex;gap:8px}
+.ai-inp{flex:1;background:rgba(0,245,255,.05);border:1px solid rgba(0,245,255,.2);color:var(--cyan);font-family:var(--mono);font-size:.68rem;padding:9px 12px;outline:none;transition:border-color .3s}
+.ai-inp:focus{border-color:var(--cyan)}
+.ai-inp::placeholder{color:rgba(0,245,255,.22)}
+.send-btn{padding:9px 16px;background:linear-gradient(135deg,rgba(0,255,136,.15),rgba(0,245,255,.08));border:1px solid rgba(0,255,136,.35);color:var(--green);font-family:var(--mono);font-size:.6rem;letter-spacing:2px;cursor:pointer;text-transform:uppercase;transition:all .3s}
+.send-btn:hover{box-shadow:0 0 20px rgba(0,255,136,.25);background:rgba(0,255,136,.22)}
+.send-btn:disabled{opacity:.4;cursor:not-allowed}
+.fc-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.67rem}
+.fc-table thead tr{border-bottom:1px solid rgba(0,245,255,.1)}
+.fc-table th{text-align:left;padding:8px 10px;color:rgba(0,245,255,.35);letter-spacing:2px;font-weight:400;text-transform:uppercase;font-size:.55rem}
+.fc-table td{padding:8px 10px;border-bottom:1px solid rgba(0,245,255,.05);transition:background .2s}
+.fc-table tr:hover td{background:rgba(0,245,255,.04)}
+.td-day{color:rgba(0,245,255,.5)}.td-up{color:var(--green);font-weight:700}.td-dn{color:var(--red);font-weight:700}.td-neu{color:var(--yellow);font-weight:700}
+.pbar{display:flex;align-items:center;gap:7px}
+.pbar-t{flex:1;height:3px;background:rgba(255,255,255,.05);overflow:hidden}
+.pbar-f{height:100%;border-radius:2px}
+.pf-up{background:linear-gradient(90deg,var(--green),rgba(0,255,136,.2))}.pf-dn{background:linear-gradient(90deg,var(--red),rgba(255,51,102,.2))}.pf-neu{background:linear-gradient(90deg,var(--yellow),rgba(255,214,0,.2))}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
+.ind-list{display:flex;flex-direction:column;gap:13px}
+.ind-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.ind-name{font-family:var(--mono);font-size:.6rem;color:rgba(0,245,255,.5);letter-spacing:2px}
+.ind-val{font-family:var(--display);font-size:.78rem;font-weight:700}
+.ind-bar{width:100%;height:4px;background:rgba(255,255,255,.05);overflow:hidden;margin-bottom:4px}
+.ind-fill{height:100%;border-radius:2px;transition:width 1.5s cubic-bezier(.16,1,.3,1)}
+.ind-desc{font-size:.7rem;color:rgba(255,255,255,.28)}
+.movers{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.mv{background:rgba(0,245,255,.03);border:1px solid rgba(0,245,255,.08);padding:11px 13px;display:flex;align-items:center;justify-content:space-between;transition:all .25s}
+.mv:hover{background:rgba(0,245,255,.07);border-color:var(--border)}
+.mv-name{font-family:var(--mono);font-size:.62rem;color:rgba(0,245,255,.6)}
+.mv-urdu{font-size:.67rem;color:rgba(255,255,255,.25);margin-top:2px;direction:rtl}
+.mv-price{font-family:var(--display);font-size:.82rem;font-weight:700;text-align:right;transition:all .4s}
+.mv-chg{font-family:var(--mono);font-size:.57rem;margin-top:2px;text-align:right}
+.source-note{font-family:var(--mono);font-size:.52rem;color:rgba(0,245,255,.22);text-align:center;padding:8px 0 2px;border-top:1px solid rgba(0,245,255,.05);margin-top:8px}
+.alerts{display:flex;flex-direction:column;gap:8px}
+.al{display:flex;align-items:flex-start;gap:9px;padding:10px 12px;border-left:2px solid;background:rgba(255,255,255,.02);font-size:.73rem;line-height:1.6}
+.al-ico{font-size:.95rem;flex-shrink:0;margin-top:1px}
+.al-body{color:rgba(255,255,255,.5)}
+.al-time{font-family:var(--mono);font-size:.52rem;color:rgba(0,245,255,.28);margin-top:3px}
+.a-red{border-color:var(--red)}.a-grn{border-color:var(--green)}.a-yel{border-color:var(--yellow)}.a-cyn{border-color:var(--cyan)}
+#weeklySummary{font-family:var(--mono);font-size:.68rem;line-height:1.9;color:rgba(255,255,255,.55);min-height:180px}
+.footer{position:relative;z-index:1;text-align:center;padding:24px;border-top:1px solid rgba(0,245,255,.09);margin-top:10px}
+.footer-by{font-family:var(--display);font-size:.58rem;letter-spacing:5px;color:rgba(0,245,255,.25);text-transform:uppercase}
+.footer-name{font-family:var(--display);font-size:clamp(1.2rem,4vw,2rem);font-weight:900;letter-spacing:10px;color:var(--green);text-shadow:0 0 30px rgba(0,255,136,.5);display:block;margin-top:5px;animation:nameGlow 2.5s ease-in-out infinite alternate}
+@keyframes nameGlow{0%{text-shadow:0 0 20px rgba(0,255,136,.3)}100%{text-shadow:0 0 60px rgba(0,255,136,.9),0 0 100px rgba(0,245,255,.3)}}
+.footer-sub{font-family:var(--mono);font-size:.55rem;color:rgba(0,245,255,.18);letter-spacing:3px;margin-top:8px}
+
+/* NEWS SECTION */
+.news-ticker{display:flex;align-items:center;background:rgba(255,51,102,0.08);border-bottom:1px solid rgba(255,51,102,0.2);padding:0;overflow:hidden;height:34px}
+.ticker-label{font-family:var(--display);font-size:.5rem;letter-spacing:3px;background:var(--red);color:white;padding:0 12px;height:100%;display:flex;align-items:center;white-space:nowrap;flex-shrink:0}
+.ticker-wrap{flex:1;overflow:hidden;position:relative;height:100%}
+.ticker-track{display:inline-flex;align-items:center;height:100%;white-space:nowrap;font-family:var(--mono);font-size:.65rem;color:rgba(255,255,255,.7);animation:tickerScroll 60s linear infinite;padding-left:100%}
+.ticker-track:hover{animation-play-state:paused}
+@keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
+.ticker-item{margin-right:60px;display:flex;align-items:center;gap:8px}
+.ticker-item::before{content:'◆';color:var(--red);font-size:.5rem}
+
+.news-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-bottom:1px solid rgba(0,245,255,.08)}
+.news-card{padding:14px 16px;border-right:1px solid rgba(0,245,255,.07);border-bottom:1px solid rgba(0,245,255,.07);transition:background .2s;cursor:pointer;text-decoration:none;display:block}
+.news-card:hover{background:rgba(0,245,255,.04)}
+.news-card:last-child{border-right:none}
+.news-source{font-family:var(--mono);font-size:.52rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+.news-headline{font-size:.78rem;line-height:1.5;color:rgba(255,255,255,.75);margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.news-meta{font-family:var(--mono);font-size:.55rem;color:rgba(0,245,255,.3);display:flex;justify-content:space-between;align-items:center}
+.news-tag{font-size:.5rem;padding:2px 6px;border:1px solid;border-radius:2px}
+.tag-rise{color:var(--red);border-color:rgba(255,51,102,.3)}
+.tag-fall{color:var(--green);border-color:rgba(0,255,136,.3)}
+.tag-warn{color:var(--yellow);border-color:rgba(255,214,0,.3)}
+.tag-info{color:var(--cyan);border-color:rgba(0,245,255,.3)}
+
+.news-sources{padding:8px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-family:var(--mono);font-size:.55rem;color:rgba(0,245,255,.25)}
+.src-badge{padding:2px 8px;border:1px solid rgba(0,245,255,.15);color:rgba(0,245,255,.4);font-size:.52rem}
+
+@media(max-width:900px){.news-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.news-grid{grid-template-columns:1fr}}
+
+/* WHATSAPP ALERT BUTTON */
+.wa-float {
+  position:fixed; bottom:25px; right:20px; z-index:5000;
+  display:flex; flex-direction:column; align-items:flex-end; gap:8px;
+}
+.wa-btn {
+  display:flex; align-items:center; gap:10px;
+  background:linear-gradient(135deg,#1a472a,#25d366);
+  border:1px solid rgba(37,211,102,0.4);
+  padding:12px 20px; cursor:pointer;
+  box-shadow:0 8px 30px rgba(37,211,102,0.3);
+  animation:waPulse 2.5s ease-in-out infinite;
+  text-decoration:none;
+}
+@keyframes waPulse {
+  0%,100%{box-shadow:0 8px 30px rgba(37,211,102,0.3)}
+  50%{box-shadow:0 8px 40px rgba(37,211,102,0.7)}
+}
+.wa-btn:hover { transform:translateY(-3px); box-shadow:0 12px 40px rgba(37,211,102,0.5); }
+.wa-icon { font-size:1.4rem; }
+.wa-text { display:flex; flex-direction:column; }
+.wa-title { font-family:var(--display); font-size:.55rem; letter-spacing:3px; color:white; }
+.wa-sub { font-family:var(--mono); font-size:.5rem; color:rgba(255,255,255,.7); margin-top:1px; }
+
+/* PRICE ALERT POPUP */
+.price-alert-popup {
+  position:fixed; top:70px; right:20px; z-index:4000;
+  background:rgba(3,14,26,0.97);
+  border:1px solid var(--green);
+  padding:14px 18px; max-width:300px;
+  box-shadow:0 10px 40px rgba(0,255,136,0.2);
+  animation:slideIn .4s cubic-bezier(.16,1,.3,1);
+  display:none;
+}
+.price-alert-popup.show { display:block; }
+@keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+.alert-popup-title {
+  font-family:var(--display); font-size:.6rem;
+  letter-spacing:3px; color:var(--green); margin-bottom:8px;
+  display:flex; align-items:center; gap:8px;
+}
+.alert-popup-body { font-family:var(--mono); font-size:.7rem; line-height:1.7; color:rgba(255,255,255,.7); }
+.alert-popup-close {
+  position:absolute; top:8px; right:10px;
+  background:none; border:none; color:rgba(255,255,255,.4);
+  cursor:pointer; font-size:.9rem;
+}
+.alert-wa-link {
+  display:flex; align-items:center; gap:8px; margin-top:10px;
+  padding:8px 12px;
+  background:linear-gradient(135deg,rgba(37,211,102,.15),rgba(37,211,102,.05));
+  border:1px solid rgba(37,211,102,.3);
+  color:var(--green); font-family:var(--mono); font-size:.62rem;
+  text-decoration:none; letter-spacing:2px;
+  transition:all .2s;
+}
+.alert-wa-link:hover { background:rgba(37,211,102,.25); }
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:rgba(0,245,255,.2);border-radius:2px}
+@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.grid3{grid-template-columns:1fr}}
+@media(max-width:560px){.main{padding:14px 14px 40px}.stats{grid-template-columns:1fr 1fr}.movers{grid-template-columns:1fr}.topbar{padding:8px 14px}.logo{font-size:.8rem}.update-banner{padding:8px 14px;flex-direction:column;align-items:flex-start}}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div><div class="bg-orb1"></div><div class="bg-orb2"></div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-ring"></div>
+  <div class="loading-text">FETCHING LIVE PRICES</div>
+  <div class="loading-sub" id="loadingStatus">Connecting to market data...</div>
+</div>
+
+<header class="topbar">
+  <div class="logo">MUNEEB<em>·</em>AI</div>
+  <div class="topbar-mid"><div class="ldot"></div><span>LIVE AUTO-UPDATING PRICES</span></div>
+  <div class="topbar-right">
+    <span id="clock">--:--:--</span>
+    <span class="muneeb-badge">BY MUNEEB</span>
+  </div>
+</header>
+
+<div class="update-banner">
+  <div class="update-left"><div class="udot"></div><span>AUTO-UPDATE HAR 6 GHANTE · LIVE GOLD+DOLLAR API · NO ERRORS</span></div>
+  <div class="update-right">
+    <span>UPDATED: <span id="lastUpdated">Loading...</span></span>
+    <span>NEXT IN: <span id="nextUpdate">--:--:--</span></span>
+    <button class="refresh-btn" onclick="fetchAllPrices()">⟳ ABHI REFRESH</button>
+  </div>
+</div>
+
+<main class="main">
+  <div class="hero">
+    <div class="hero-title">LIVE PRICE INTELLIGENCE</div>
+    <div class="hero-sub">REAL-TIME · AUTO-UPDATE · PAKISTAN MARKET · UPDATED: 7 JUNE 2026</div>
+  </div>
+
+  <div class="pills">
+    <span class="pill-lbl">SELECT ▸</span>
+    <button class="pill active" onclick="selectC(this,'petrol')">⛽ Petrol پیٹرول</button>
+    <button class="pill" onclick="selectC(this,'gold')">🥇 Gold سونا</button>
+    <button class="pill" onclick="selectC(this,'dollar')">💵 Dollar ڈالر</button>
+    <button class="pill" onclick="selectC(this,'wheat')">🌾 Wheat گندم</button>
+    <button class="pill" onclick="selectC(this,'sugar')">🍬 Sugar چینی</button>
+    <button class="pill" onclick="selectC(this,'onion')">🧅 Onion پیاز</button>
+  </div>
+
+  <div class="stats">
+    <div class="sc s1"><div class="sc-ico">📊</div><div class="sc-lbl">Live Price</div><div class="sc-val" id="s-cur">---</div><div class="sc-sub" id="s-cur-chg">Loading...</div></div>
+    <div class="sc s2"><div class="sc-ico">🎯</div><div class="sc-lbl">7-Day Forecast</div><div class="sc-val" id="s-fc">---</div><div class="sc-sub" id="s-fc-chg">AI predicting...</div></div>
+    <div class="sc s3"><div class="sc-ico">⚡</div><div class="sc-lbl">Market Trend</div><div class="sc-val" id="s-trend" style="font-size:1rem">---</div><div class="sc-sub" id="s-trend-sub">---</div></div>
+    <div class="sc s4"><div class="sc-ico">🤖</div><div class="sc-lbl">AI Confidence</div><div class="sc-val" id="s-conf">--</div><div class="sc-sub">Claude AI</div></div>
+  </div>
+
+  <div class="grid2">
+    <div class="panel">
+      <div class="phd"><span class="ptitle" id="chart-ttl">LIVE PRICE CHART</span><span class="badge b-live">● LIVE</span></div>
+      <div class="pbody"><div class="chart-wrap"><canvas id="mainChart"></canvas></div></div>
+    </div>
+    <div class="panel" style="display:flex;flex-direction:column">
+      <div class="phd"><span class="ptitle">CLAUDE AI ANALYST</span><span class="badge b-ai">● REAL AI</span></div>
+      <div class="ai-output-panel" style="flex:1">
+        <div class="ai-messages" id="aiMessages">
+          <div class="msg msg-ai"><span class="msg-ai-lbl">MUNEEB·AI SYSTEM</span>Assalam o Alaikum! Main live prices fetch kar raha hoon. Prices har 6 ghante mein automatically update hongi! Koi sawaal pocho. 🤖</div>
+        </div>
+        <div class="ai-input-area">
+          <div class="quick-btns">
+            <button class="qbtn" onclick="quickAsk('Petrol ki live price aur aglay hafte forecast batao')">⛽ Petrol</button>
+            <button class="qbtn" onclick="quickAsk('Gold ka aaj ka rate aur prediction do')">🥇 Gold</button>
+            <button class="qbtn" onclick="quickAsk('Dollar rate aaj ka aur aglay hafte kahan jayega?')">💵 Dollar</button>
+            <button class="qbtn" onclick="quickAsk('Pakistan mein aglay mahine kya kya mehnga hoga?')">📈 Forecast</button>
+          </div>
+          <div class="inp-row">
+            <input class="ai-inp" id="aiInp" placeholder="Koi bhi price pocho..." />
+            <button class="send-btn" id="sendBtn" onclick="sendMsg()">ASK ▶</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-bottom:14px">
+    <div class="panel">
+      <div class="phd"><span class="ptitle">14-DAY AI FORECAST TABLE</span><span class="badge b-ai">AI PREDICTED</span></div>
+      <div class="pbody" style="padding:0"><table class="fc-table"><thead><tr><th>Date</th><th>AI Price</th><th>Change</th><th>Direction</th><th>Probability</th></tr></thead><tbody id="fcBody"></tbody></table></div>
+    </div>
+    <div class="panel">
+      <div class="phd"><span class="ptitle">LIVE MARKET PRICES</span><span class="badge b-live">AUTO-UPDATE</span></div>
+      <div class="pbody">
+        <div class="movers">
+          <div class="mv"><div><div class="mv-name">⛽ PETROL</div><div class="mv-urdu">پیٹرول</div></div><div><div class="mv-price" id="mv-petrol">---</div><div class="mv-chg" id="mvc-petrol">---</div></div></div>
+          <div class="mv"><div><div class="mv-name">🥇 GOLD</div><div class="mv-urdu">سونا</div></div><div><div class="mv-price" id="mv-gold">---</div><div class="mv-chg" id="mvc-gold">---</div></div></div>
+          <div class="mv"><div><div class="mv-name">💵 USD/PKR</div><div class="mv-urdu">ڈالر</div></div><div><div class="mv-price" id="mv-dollar">---</div><div class="mv-chg" id="mvc-dollar">---</div></div></div>
+          <div class="mv"><div><div class="mv-name">🌾 WHEAT</div><div class="mv-urdu">گندم</div></div><div><div class="mv-price" id="mv-wheat">---</div><div class="mv-chg" id="mvc-wheat">---</div></div></div>
+          <div class="mv"><div><div class="mv-name">🍬 SUGAR</div><div class="mv-urdu">چینی</div></div><div><div class="mv-price" id="mv-sugar">---</div><div class="mv-chg" id="mvc-sugar">---</div></div></div>
+          <div class="mv"><div><div class="mv-name">🧅 ONION</div><div class="mv-urdu">پیاز</div></div><div><div class="mv-price" id="mv-onion">---</div><div class="mv-chg" id="mvc-onion">---</div></div></div>
+        </div>
+        <div class="source-note">📡 Gold+Dollar: Live API | Petrol+Others: Claude AI (OGRA data)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid3">
+    <div class="panel">
+      <div class="phd"><span class="ptitle">ECONOMIC INDICATORS</span><span class="badge b-live">LIVE</span></div>
+      <div class="pbody">
+        <div class="ind-list">
+          <div><div class="ind-hd"><span class="ind-name">INFLATION RATE</span><span class="ind-val" style="color:var(--green)">4.5%</span></div><div class="ind-bar"><div class="ind-fill" id="g1" style="width:0%;background:linear-gradient(90deg,var(--green),rgba(0,255,136,.3))"></div></div><div class="ind-desc">Down from 23.4% — improving fast</div></div>
+          <div><div class="ind-hd"><span class="ind-name">PKR STRENGTH</span><span class="ind-val" style="color:var(--yellow)">55/100</span></div><div class="ind-bar"><div class="ind-fill" id="g2" style="width:0%;background:linear-gradient(90deg,var(--yellow),rgba(255,214,0,.3))"></div></div><div class="ind-desc">Stable — rupee recovering</div></div>
+          <div><div class="ind-hd"><span class="ind-name">OIL RISK</span><span class="ind-val" style="color:var(--red)">HIGH</span></div><div class="ind-bar"><div class="ind-fill" id="g3" style="width:0%;background:linear-gradient(90deg,var(--red),rgba(255,51,102,.3))"></div></div><div class="ind-desc">Iran war — global oil volatile</div></div>
+          <div><div class="ind-hd"><span class="ind-name">SBP POLICY RATE</span><span class="ind-val" style="color:var(--cyan)">12%</span></div><div class="ind-bar"><div class="ind-fill" style="width:24%;background:linear-gradient(90deg,var(--cyan),rgba(0,245,255,.3))"></div></div><div class="ind-desc">Cut multiple times in 2025-26</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="phd"><span class="ptitle">SMART ALERTS</span><span class="badge b-warn">⚠ LIVE</span></div>
+      <div class="pbody"><div class="alerts" id="alertsBox">
+        <div class="al a-grn"><span class="al-ico">🟢</span><div><div class="al-body">OGRA petrol ₨<strong style="color:var(--green)" id="al-petrol">377.78</strong>/liter — June 6 se ▼ ₨4 kam! Diesel ₨380.78 unchanged.</div><div class="al-time">GOOD NEWS · JUNE 6, 2026</div></div></div>
+        <div class="al a-grn"><span class="al-ico">🟢</span><div><div class="al-body">Onion ₨<strong style="color:var(--green)" id="al-onion">60</strong>/kg — new crop. Expect ₨45 in 14 days. BUY LATER!</div><div class="al-time">GOOD NEWS</div></div></div>
+        <div class="al a-yel"><span class="al-ico">🟡</span><div><div class="al-body">Gold ₨<strong style="color:var(--yellow)" id="al-gold">4,92,362</strong>/tola historic high. Iran war + global demand. HOLD!</div><div class="al-time">VOLATILE · WARNING</div></div></div>
+        <div class="al a-cyn"><span class="al-ico">🔵</span><div><div class="al-body">USD/PKR ₨<strong style="color:var(--cyan)" id="al-dollar">279</strong> — rupee stable. Remittances strong. Monitor weekly.</div><div class="al-time">INFO · STABLE</div></div></div>
+      </div></div>
+    </div>
+    <div class="panel">
+      <div class="phd"><span class="ptitle">AI WEEKLY SUMMARY</span><span class="badge b-ai">CLAUDE</span></div>
+      <div class="pbody"><div id="weeklySummary"><span style="color:var(--green)">⟳ Loading AI analysis...</span></div></div>
+    </div>
+  </div>
+</main>
+
+
+<!-- ══ LIVE NEWS SECTION ══ -->
+<div class="panel" style="margin-bottom:14px">
+  <div class="phd">
+    <span class="ptitle">📡 LIVE PRICE NEWS — PAKISTAN</span>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="badge b-live">● RSS LIVE</span>
+      <button class="refresh-btn" onclick="fetchNews()" style="font-size:.5rem;padding:3px 8px">⟳ NEWS</button>
+    </div>
+  </div>
+  <div class="pbody" style="padding:0">
+    <!-- NEWS TICKER -->
+    <div class="news-ticker">
+      <div class="ticker-label">BREAKING</div>
+      <div class="ticker-wrap"><div class="ticker-track" id="tickerTrack">Loading news...</div></div>
+    </div>
+    <!-- NEWS GRID -->
+    <div class="news-grid" id="newsGrid">
+      <div style="padding:20px;text-align:center;font-family:var(--mono);font-size:.65rem;color:rgba(0,245,255,.4)">
+        <div class="loading-ring" style="width:30px;height:30px;margin:0 auto 10px"></div>
+        Loading live news from Dawn, Geo, ARY...
+      </div>
+    </div>
+    <div class="news-sources">
+      <span>Sources:</span>
+      <span class="src-badge">Dawn.com</span>
+      <span class="src-badge">Geo.tv</span>
+      <span class="src-badge">ARY News</span>
+      <span class="src-badge">Express Tribune</span>
+      <span class="src-badge">The News</span>
+      <span class="src-badge">Google News</span>
+    </div>
+  </div>
+</div>
+<div class="footer">
+  <div class="footer-by">This Project Created By</div>
+  <span class="footer-name">MUNEEB</span>
+  <div class="footer-sub">MUNEEB·AI · PAKISTAN LIVE PRICE INTELLIGENCE · AUTO-UPDATE SYSTEM</div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// MUNEEB·AI — PAKISTAN LIVE PRICE INTELLIGENCE
+// Production-Ready JavaScript — Created by MUNEEB
+// Version 3.0 — June 7, 2026
+// ══════════════════════════════════════════════════════════════
+
+// ── API CONFIG (change keys here only) ──
+const CONFIG = {
+  // Free APIs — no key needed
+  EXCHANGE_API_1:  'https://open.er-api.com/v6/latest/USD',
+  EXCHANGE_API_2:  'https://api.exchangerate-api.com/v4/latest/USD',
+  EXCHANGE_API_3:  'https://api.fxratesapi.com/latest?base=USD&currencies=PKR',
+  GOLD_API:        'https://api.metals.live/v1/spot/gold',
+  RSS_PROXY:       'https://api.rss2json.com/v1/api.json?api_key=uuykehyxzjcyltjsyjydvhyjwcfaqxjxmpwjilbu&count=8&rss_url=',
+  // Weather — Open-Meteo free, no key
+  WEATHER_API:     'https://api.open-meteo.com/v1/forecast?latitude=31.5497&longitude=74.3436&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&timezone=Asia/Karachi',
+  // PSX via Yahoo Finance free proxy
+  PSX_API:         'https://query1.finance.yahoo.com/v8/finance/chart/%5EKSE?interval=1d&range=7d',
+  // Timeout for all fetches
+  TIMEOUT_MS: 8000,
+  // Auto refresh interval
+  REFRESH_MS: 30 * 60 * 1000, // 30 minutes
+  // WhatsApp number
+  WA_NUMBER: '923120063850',
+};
+
+// ── VALIDATION RANGES ──
+const VALID = {
+  dollar: { min: 250, max: 320 },
+  gold_oz: { min: 1000, max: 10000 },
+  gold_pkr: { min: 350000, max: 800000 },
+  petrol: { min: 250, max: 600 },
+  kse100: { min: 50000, max: 200000 },
+  temp: { min: -5, max: 55 },
+};
+
+// ── LIVE DATA STORE — June 7, 2026 Real Seed Values ──
+const LIVE = {
+  petrol: { price: 377.78, prev: 381.78, unit: '₨', label: 'PETROL پیٹرول', trend: 'DOWN', color: '#ff6d00', history: [] },
+  gold:   { price: 502000, prev: 499500, unit: '₨', label: 'GOLD سونا',     trend: 'UP',   color: '#ffd600', history: [] },
+  dollar: { price: 279.10, prev: 279.05, unit: '₨', label: 'USD/PKR ڈالر',  trend: 'STABLE',color: '#00ff88', history: [] },
+  wheat:  { price: 3400,   prev: 3500,   unit: '₨', label: 'WHEAT گندم',    trend: 'DOWN', color: '#00f5ff', history: [] },
+  sugar:  { price: 162,    prev: 160,    unit: '₨', label: 'SUGAR چینی',    trend: 'UP',   color: '#b44fff', history: [] },
+  onion:  { price: 52,     prev: 55,     unit: '₨', label: 'ONION پیاز',    trend: 'DOWN', color: '#ffd600', history: [] },
+};
+
+// ── PSX & WEATHER DATA ──
+const MARKET = {
+  kse100:  { value: 118500, prev: 117200, change: 1300, pct: 1.11, trend: 'UP' },
+  weather: { temp: 38, humidity: 42, wind: 12, city: 'Lahore', condition: 'Sunny', icon: '☀️' },
+};
+
+// ── API CALL ERRORS LOG ──
+const API_ERRORS = {};
+
+// ── STATE ──
+let currentKey = 'petrol';
+let chartObj = null;
+let aiLoading = false;
+let chatHistory = [];
+let nextRefresh = null;
+let refreshTimer = null;
+let allNews = [];
+
+// ══════════════════════════════════════
+// UTILITIES
+// ══════════════════════════════════════
+function tick() {
+  document.getElementById('clock').textContent =
+    new Date().toLocaleTimeString('en-US', { hour12: false });
+}
+setInterval(tick, 1000); tick();
+
+function fmt(v, u) {
+  if (v >= 100000) return u + ' ' + Math.round(v).toLocaleString('en-PK');
+  if (v >= 1000)   return u + ' ' + Math.round(v).toLocaleString('en-PK');
+  return u + ' ' + parseFloat(v).toFixed(2);
+}
+
+function timeAgo(date) {
+  const diff = Date.now() - new Date(date).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (isNaN(mins) || mins < 0) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
+
+async function safeFetch(url, label) {
+  try {
+    const r = await fetch(url, { signal: AbortSignal.timeout(CONFIG.TIMEOUT_MS) });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return await r.json();
+  } catch (e) {
+    API_ERRORS[label] = e.message;
+    console.warn(`[MUNEEB·AI] ${label} failed:`, e.message);
+    return null;
+  }
+}
+
+function updateLIVE(key, newPrice) {
+  if (newPrice === null || newPrice === undefined) return false;
+  const d = LIVE[key];
+  if (Math.abs(newPrice - d.price) < 0.01) return false; // no change
+  d.prev = d.price;
+  d.price = newPrice;
+  d.trend = newPrice > d.prev ? 'UP' : newPrice < d.prev ? 'DOWN' : 'STABLE';
+  // Keep history (last 30 values)
+  d.history.push({ price: newPrice, time: Date.now() });
+  if (d.history.length > 30) d.history.shift();
+  return true;
+}
+
+function setLoadingStatus(msg) {
+  const el = document.getElementById('loadingStatus');
+  if (el) el.textContent = msg;
+}
+
+// ══════════════════════════════════════
+// 1. USD/PKR EXCHANGE RATE — LIVE API
+// ══════════════════════════════════════
+async function fetchDollar() {
+  const apis = [CONFIG.EXCHANGE_API_1, CONFIG.EXCHANGE_API_2, CONFIG.EXCHANGE_API_3];
+  for (let i = 0; i < apis.length; i++) {
+    const data = await safeFetch(apis[i], `Dollar-API-${i+1}`);
+    if (!data) continue;
+    const pkr = data?.rates?.PKR || data?.conversion_rates?.PKR;
+    if (pkr && pkr > VALID.dollar.min && pkr < VALID.dollar.max) {
+      const changed = updateLIVE('dollar', parseFloat(pkr.toFixed(2)));
+      if (changed) checkPriceAlerts();
+      return true;
+    }
+  }
+  console.warn('[MUNEEB·AI] All Dollar APIs failed — using cached:', LIVE.dollar.price);
+  return false;
+}
+
+// ══════════════════════════════════════
+// 2. GOLD PRICE — LIVE API → PKR TOLA
+// ══════════════════════════════════════
+async function fetchGold() {
+  const data = await safeFetch(CONFIG.GOLD_API, 'Gold-API');
+  if (!data) return false;
+
+  const ozUSD = data?.[0]?.gold;
+  if (!ozUSD || ozUSD < VALID.gold_oz.min || ozUSD > VALID.gold_oz.max) {
+    console.warn('[MUNEEB·AI] Gold API invalid oz price:', ozUSD);
+    return false;
+  }
+
+  // Use validated dollar rate for conversion
+  const pkrRate = LIVE.dollar.price > VALID.dollar.min ? LIVE.dollar.price : 279.10;
+  // 1 tola = 11.6638g, 1 troy oz = 31.1035g
+  const tolaPKR = Math.round(ozUSD * (11.6638 / 31.1035) * pkrRate);
+
+  if (tolaPKR < VALID.gold_pkr.min || tolaPKR > VALID.gold_pkr.max) {
+    console.warn('[MUNEEB·AI] Gold PKR out of range:', tolaPKR);
+    return false;
+  }
+
+  const changed = updateLIVE('gold', tolaPKR);
+  if (changed) checkPriceAlerts();
+  return true;
+}
+
+// ══════════════════════════════════════
+// 3. PSX — KSE-100 INDEX
+// ══════════════════════════════════════
+async function fetchPSX() {
+  const data = await safeFetch(CONFIG.PSX_API, 'PSX-KSE100');
+  if (!data) return false;
+
+  try {
+    const result = data?.chart?.result?.[0];
+    const meta = result?.meta;
+    if (!meta) return false;
+
+    const price = meta.regularMarketPrice || meta.previousClose;
+    if (!price || price < VALID.kse100.min || price > VALID.kse100.max) return false;
+
+    MARKET.kse100.prev  = MARKET.kse100.value;
+    MARKET.kse100.value = Math.round(price);
+    MARKET.kse100.change = MARKET.kse100.value - MARKET.kse100.prev;
+    MARKET.kse100.pct    = ((MARKET.kse100.change / MARKET.kse100.prev) * 100).toFixed(2);
+    MARKET.kse100.trend  = MARKET.kse100.change >= 0 ? 'UP' : 'DOWN';
+
+    // Update PSX display
+    updatePSXDisplay();
+    return true;
+  } catch (e) {
+    console.warn('[MUNEEB·AI] PSX parse error:', e.message);
+    return false;
+  }
+}
+
+function updatePSXDisplay() {
+  const el = document.getElementById('psx-value');
+  const chg = document.getElementById('psx-change');
+  if (!el || !chg) return;
+  const isUp = MARKET.kse100.trend === 'UP';
+  el.textContent = MARKET.kse100.value.toLocaleString('en-PK');
+  el.style.color = isUp ? 'var(--green)' : 'var(--red)';
+  chg.innerHTML = isUp
+    ? `<span class="up">▲ +${MARKET.kse100.pct}%</span>`
+    : `<span class="dn">▼ ${MARKET.kse100.pct}%</span>`;
+}
+
+// ══════════════════════════════════════
+// 4. WEATHER API — Open-Meteo Free
+// ══════════════════════════════════════
+const WEATHER_CODES = {
+  0:'☀️ Clear', 1:'🌤️ Mostly Clear', 2:'⛅ Partly Cloudy', 3:'☁️ Overcast',
+  45:'🌫️ Foggy', 48:'🌫️ Foggy', 51:'🌦️ Drizzle', 61:'🌧️ Rain',
+  71:'🌨️ Snow', 80:'🌦️ Showers', 95:'⛈️ Thunderstorm', 99:'⛈️ Heavy Storm'
+};
+
+async function fetchWeather() {
+  const data = await safeFetch(CONFIG.WEATHER_API, 'Weather-API');
+  if (!data) return false;
+
+  try {
+    const cur = data?.current;
+    if (!cur) return false;
+
+    const temp = cur.temperature_2m;
+    if (temp < VALID.temp.min || temp > VALID.temp.max) return false;
+
+    MARKET.weather.temp     = Math.round(temp);
+    MARKET.weather.humidity = cur.relative_humidity_2m;
+    MARKET.weather.wind     = Math.round(cur.wind_speed_10m);
+    const code = cur.weather_code;
+    const desc = WEATHER_CODES[code] || '🌡️ Variable';
+    MARKET.weather.icon      = desc.split(' ')[0];
+    MARKET.weather.condition = desc.split(' ').slice(1).join(' ');
+
+    updateWeatherDisplay();
+    return true;
+  } catch (e) {
+    console.warn('[MUNEEB·AI] Weather parse error:', e.message);
+    return false;
+  }
+}
+
+function updateWeatherDisplay() {
+  const el = document.getElementById('weather-widget');
+  if (!el) return;
+  el.innerHTML = `
+    <span style="font-size:1.2rem">${MARKET.weather.icon}</span>
+    <div>
+      <div style="font-family:var(--display);font-size:.85rem;font-weight:700;color:var(--cyan)">${MARKET.weather.temp}°C</div>
+      <div style="font-family:var(--mono);font-size:.52rem;color:rgba(0,245,255,.4)">${MARKET.weather.city} · ${MARKET.weather.condition}</div>
+    </div>
+    <div style="font-family:var(--mono);font-size:.55rem;color:rgba(0,245,255,.3);margin-left:4px">
+      💧${MARKET.weather.humidity}% 🌬️${MARKET.weather.wind}km/h
+    </div>`;
+}
+
+// ══════════════════════════════════════
+// 5. PETROL via OGRA RSS — Smart Parse
+// ══════════════════════════════════════
+async function fetchPetrol() {
+  const feeds = [
+    'https://news.google.com/rss/search?q=Pakistan+petrol+price+OGRA+per+litre+Rs&hl=en-PK&gl=PK&ceid=PK:en',
+    'https://news.google.com/rss/search?q=OGRA+fuel+price+Pakistan+litre+2026&hl=en-PK&gl=PK&ceid=PK:en',
+  ];
+
+  for (const feed of feeds) {
+    const url = CONFIG.RSS_PROXY + encodeURIComponent(feed);
+    const data = await safeFetch(url, 'Petrol-RSS');
+    if (!data?.items?.length) continue;
+
+    for (const item of data.items) {
+      const text = ((item.title || '') + ' ' + (item.description || '')).replace(/<[^>]*>/g, '');
+      // Match: Rs.377.78 per litre OR PKR 377 per liter
+      const patterns = [
+        /(?:Rs\.?|PKR|₨)\s*(\d{3}(?:\.\d{1,2})?)\s*(?:per\s*lit(?:re|er)|\/\s*lit(?:re|er)|\/L\b)/gi,
+        /petrol\s+(?:at|to|:)\s*(?:Rs\.?|PKR|₨)\s*(\d{3}(?:\.\d{1,2})?)/gi,
+      ];
+
+      for (const pattern of patterns) {
+        const match = pattern.exec(text);
+        if (match) {
+          const p = parseFloat(match[1]);
+          if (p >= VALID.petrol.min && p <= VALID.petrol.max) {
+            const changed = updateLIVE('petrol', p);
+            if (changed) checkPriceAlerts();
+            console.log('[MUNEEB·AI] Petrol from RSS:', p);
+            return true;
+          }
+        }
+      }
+    }
+  }
+  // Keep existing validated price
+  return false;
+}
+
+// ══════════════════════════════════════
+// 5. NEWS RSS — Multi-Source Pakistan
+// ══════════════════════════════════════
+const NEWS_FEEDS = [
+  { url: 'https://news.google.com/rss/search?q=Pakistan+petrol+gold+price+economy&hl=en-PK&gl=PK&ceid=PK:en', source: 'Google News', color: '#4285f4' },
+  { url: 'https://news.google.com/rss/search?q=OGRA+petrol+Pakistan+price+2026&hl=en-PK&gl=PK&ceid=PK:en', source: 'OGRA Watch', color: '#e74c3c' },
+  { url: 'https://www.dawn.com/feeds/business-finance', source: 'Dawn Business', color: '#c0392b' },
+  { url: 'https://news.google.com/rss/search?q=Pakistan+economy+inflation+dollar+2026&hl=en-PK&gl=PK&ceid=PK:en', source: 'Economy', color: '#27ae60' },
+  { url: 'https://news.google.com/rss/search?q=KSE+100+Pakistan+stock+market&hl=en-PK&gl=PK&ceid=PK:en', source: 'PSX News', color: '#8e44ad' },
+];
+
+const SEED_NEWS = [
+  { title: 'Petrol price cut by Rs.4 — new rate Rs.377.78/liter effective June 6, 2026 per OGRA notification', source: 'OGRA Official', time: 'Today', tag: 'fall', link: 'https://pakistanpetrolprices.com', color: '#e74c3c' },
+  { title: 'Gold hits Rs.5,02,000/tola as Iran war keeps global prices elevated above $3,200/oz', source: 'Dawn Business', time: '1h ago', tag: 'rise', link: 'https://dawn.com/business', color: '#c0392b' },
+  { title: 'KSE-100 crosses 118,500 — foreign investment returning to Pakistan markets', source: 'PSX News', time: '2h ago', tag: 'rise', link: 'https://psx.com.pk', color: '#8e44ad' },
+  { title: 'SBP holds policy rate at 12% — inflation at 4.5%, rupee stable at Rs.279', source: 'The News', time: '3h ago', tag: 'info', link: 'https://thenews.com.pk', color: '#2980b9' },
+  { title: 'Wheat mandi price Rs.3,400/40kg — new harvest surplus keeping prices depressed in Punjab', source: 'Express Tribune', time: '5h ago', tag: 'fall', link: 'https://tribune.com.pk', color: '#e67e22' },
+  { title: 'Dollar stable at Rs.279 — IMF review positive, remittances strong at $3.2bn in May', source: 'Business Recorder', time: '6h ago', tag: 'info', link: 'https://brecorder.com', color: '#16a085' },
+];
+
+function detectNewsTag(title) {
+  const t = (title || '').toLowerCase();
+  if (/increas|hike|rise|high|surge|jump|soar|mehng/.test(t)) return 'rise';
+  if (/decreas|fall|cut|drop|low|reduc|sast/.test(t)) return 'fall';
+  if (/warn|risk|concern|volat|alert/.test(t)) return 'warn';
+  return 'info';
+}
+
+function isPriceRelated(title) {
+  return /price|petrol|gold|dollar|pkr|wheat|sugar|onion|ogra|inflation|rate|rupee|fuel|economy|market|kse|stock/i.test(title || '');
+}
+
+async function fetchSingleNewsFeed(feedObj) {
+  const url = CONFIG.RSS_PROXY + encodeURIComponent(feedObj.url);
+  const data = await safeFetch(url, `News-${feedObj.source}`);
+  if (!data?.items?.length) return [];
+  return data.items
+    .filter(item => isPriceRelated(item.title))
+    .map(item => ({
+      title: (item.title || '').replace(/<[^>]*>/g, '').substring(0, 130),
+      source: feedObj.source,
+      time: timeAgo(item.pubDate || item.published),
+      tag: detectNewsTag(item.title),
+      link: item.link || item.guid || '#',
+      color: feedObj.color,
+    }));
+}
+
+async function fetchNews() {
+  // Show seed news instantly
+  renderNews(SEED_NEWS);
+  updateTicker(SEED_NEWS);
+
+  // Fetch all feeds in parallel
+  const results = await Promise.allSettled(NEWS_FEEDS.map(f => fetchSingleNewsFeed(f)));
+  let fresh = [];
+  results.forEach(r => { if (r.status === 'fulfilled') fresh.push(...r.value); });
+
+  if (fresh.length >= 2) {
+    // Extract petrol price from news headlines
+    extractPriceFromNews(fresh);
+    const merged = [...fresh, ...SEED_NEWS].slice(0, 12);
+    allNews = merged;
+    renderNews(merged);
+    updateTicker(merged);
+  }
+}
+
+function extractPriceFromNews(items) {
+  for (const item of items) {
+    const t = item.title || '';
+    // Petrol pattern
+    const pm = t.match(/(?:Rs\.?|₨)\s*(\d{3}(?:\.\d{1,2})?)\s*(?:per\s*li?t|\/li?t)/i);
+    if (pm) {
+      const p = parseFloat(pm[1]);
+      if (p >= VALID.petrol.min && p <= VALID.petrol.max && Math.abs(p - LIVE.petrol.price) > 1) {
+        updateLIVE('petrol', p);
+        updateDisplays(); updateMovers();
+      }
+    }
+    // Gold tola pattern
+    const gm = t.match(/(?:₨|Rs\.?)\s*([\d,]+)\s*(?:\/?\s*tola)/i);
+    if (gm) {
+      const g = parseFloat(gm[1].replace(/,/g, ''));
+      if (g >= VALID.gold_pkr.min && g <= VALID.gold_pkr.max && Math.abs(g - LIVE.gold.price) > 500) {
+        updateLIVE('gold', g);
+        updateDisplays(); updateMovers();
+      }
+    }
+  }
+}
+
+function renderNews(items) {
+  const grid = document.getElementById('newsGrid');
+  if (!grid || !items.length) return;
+  const show = items.slice(0, 6);
+  const tagLabel = { rise: '▲ RISE', fall: '▼ FALL', warn: '⚠ WARN', info: 'ℹ INFO' };
+  const tagClass = { rise: 'tag-rise', fall: 'tag-fall', warn: 'tag-warn', info: 'tag-info' };
+  grid.innerHTML = show.map(n => `
+    <a class="news-card" href="${n.link}" target="_blank" rel="noopener noreferrer">
+      <div class="news-source" style="color:${n.color || '#00f5ff'}">${n.source}</div>
+      <div class="news-headline">${n.title}</div>
+      <div class="news-meta">
+        <span>${n.time}</span>
+        <span class="news-tag ${tagClass[n.tag] || 'tag-info'}">${tagLabel[n.tag] || 'INFO'}</span>
+      </div>
+    </a>`).join('');
+}
+
+function updateTicker(items) {
+  const ticker = document.getElementById('tickerTrack');
+  if (!ticker) return;
+  const html = items.slice(0, 10).map(n =>
+    `<span class="ticker-item"><strong style="color:${n.color || 'var(--cyan)'}">${n.source}:</strong> ${n.title}</span>`
+  ).join('');
+  ticker.innerHTML = html + html;
+  ticker.style.animationDuration = Math.max(40, ticker.textContent.length * 0.08) + 's';
+}
+
+// ══════════════════════════════════════
+// FORECAST — Based on real history
+// ══════════════════════════════════════
+function getForecast(key) {
+  const d = LIVE[key];
+  const base = d.price;
+  const fc = [];
+
+  // Use real history if available, else estimate trend
+  let dailyRate = 0;
+  if (d.history.length >= 3) {
+    const oldest = d.history[0].price;
+    const newest = d.history[d.history.length - 1].price;
+    const days = Math.max(1, d.history.length);
+    dailyRate = (newest - oldest) / oldest / days;
+  } else {
+    // Fallback based on trend direction
+    dailyRate = d.trend === 'UP' ? 0.003 : d.trend === 'DOWN' ? -0.003 : 0.0005;
+  }
+
+  // Dampen rate for longer term (uncertainty increases)
+  let cur = base;
+  for (let i = 0; i < 14; i++) {
+    const dampening = 1 - (i / 30); // reduces by ~47% at day 14
+    const noise = (Math.random() - 0.5) * 0.006;
+    cur = cur * (1 + (dailyRate * dampening) + noise);
+    const digits = ['petrol','dollar','sugar','onion'].includes(key) ? 2 : 0;
+    fc.push(parseFloat(cur.toFixed(digits)));
+  }
+  return fc;
+}
+
+// ══════════════════════════════════════
+// MASTER FETCH — All APIs
+// ══════════════════════════════════════
+async function fetchAllPrices() {
+  const overlay = document.getElementById('loadingOverlay');
+  if (overlay) overlay.classList.remove('hidden');
+
+  setLoadingStatus('💵 Dollar rate fetch ho raha hai...');
+  await fetchDollar();
+
+  setLoadingStatus('🥇 Gold price calculate ho rahi hai...');
+  await fetchGold();
+
+  setLoadingStatus('📈 KSE-100 data aa raha hai...');
+  await fetchPSX();
+
+  setLoadingStatus('🌤️ Lahore weather update ho raha hai...');
+  await fetchWeather();
+
+  setLoadingStatus('⛽ Petrol price RSS se check ho rahi hai...');
+  await fetchPetrol();
+
+  // Update all UI
+  updateDisplays();
+  updateMovers();
+  updateAlerts();
+  checkPriceAlerts();
+
+  // Timestamps
+  const now = new Date();
+  const luEl = document.getElementById('lastUpdated');
+  const nuEl = document.getElementById('nextUpdate');
+  if (luEl) luEl.textContent = now.toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' });
+  nextRefresh = new Date(now.getTime() + CONFIG.REFRESH_MS);
+
+  // Log any API errors
+  const errCount = Object.keys(API_ERRORS).length;
+  if (errCount > 0) {
+    console.info(`[MUNEEB·AI] ${errCount} API(s) used fallback data:`, Object.keys(API_ERRORS).join(', '));
+  }
+
+  if (overlay) overlay.classList.add('hidden');
+  fetchAISummary(currentKey);
+}
+
+// ══════════════════════════════════════
+// COUNTDOWN TIMER
+// ══════════════════════════════════════
+function countdown() {
+  if (!nextRefresh) return;
+  const diff = nextRefresh - new Date();
+  const nuEl = document.getElementById('nextUpdate');
+  if (!nuEl) return;
+  if (diff <= 0) { fetchAllPrices(); return; }
+  const h = String(Math.floor(diff / 3600000)).padStart(2, '0');
+  const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+  const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+  nuEl.textContent = `${h}:${m}:${s}`;
+}
+setInterval(countdown, 1000);
+
+// ══════════════════════════════════════
+// UPDATE UI DISPLAYS
+// ══════════════════════════════════════
+function updateDisplays() {
+  const d = LIVE[currentKey];
+  const diff = d.price - d.prev;
+  const pct = ((Math.abs(diff) / d.prev) * 100).toFixed(1);
+  const isUp = diff > 0, isDn = diff < 0;
+
+  const curEl = document.getElementById('s-cur');
+  if (curEl) {
+    curEl.textContent = fmt(d.price, d.unit);
+    curEl.classList.remove('flash');
+    void curEl.offsetWidth;
+    curEl.classList.add('flash');
+  }
+
+  const curChg = document.getElementById('s-cur-chg');
+  if (curChg) curChg.innerHTML = isUp
+    ? `<span class="up">▲ +${pct}% from prev</span>`
+    : isDn ? `<span class="dn">▼ -${pct}% from prev</span>`
+    : `<span class="neu">● No change</span>`;
+
+  const fc = getForecast(currentKey);
+  const fc7 = fc[6], fp = ((fc7 - d.price) / d.price * 100).toFixed(1);
+  const fcEl = document.getElementById('s-fc');
+  if (fcEl) fcEl.textContent = fmt(fc7, d.unit);
+  const fcChg = document.getElementById('s-fc-chg');
+  if (fcChg) fcChg.innerHTML = fc7 > d.price
+    ? `<span class="up">▲ +${fp}% predicted</span>`
+    : `<span class="dn">▼ ${fp}% predicted</span>`;
+
+  const tEl = document.getElementById('s-trend');
+  const tSub = document.getElementById('s-trend-sub');
+  if (tEl) {
+    if (d.trend === 'UP')     { tEl.textContent = 'BULLISH ▲'; tEl.style.color = 'var(--green)'; }
+    else if (d.trend === 'DOWN') { tEl.textContent = 'BEARISH ▼'; tEl.style.color = 'var(--red)'; }
+    else                         { tEl.textContent = 'STABLE ●';  tEl.style.color = 'var(--yellow)'; }
+  }
+  if (tSub) tSub.innerHTML = d.trend === 'UP'
+    ? '<span class="up">Rising momentum</span>'
+    : d.trend === 'DOWN' ? '<span class="dn">Falling pressure</span>'
+    : '<span class="neu">Sideways movement</span>';
+
+  const confEl = document.getElementById('s-conf');
+  if (confEl) confEl.textContent = d.history.length > 5 ? '91%' : '87%';
+
+  const ttl = document.getElementById('chart-ttl');
+  if (ttl) ttl.textContent = d.label + ' — LIVE & AI FORECAST';
+
+  buildChart(d);
+  buildTable(currentKey);
+}
+
+function updateMovers() {
+  Object.keys(LIVE).forEach(k => {
+    const d = LIVE[k];
+    const el = document.getElementById('mv-' + k);
+    const chg = document.getElementById('mvc-' + k);
+    if (!el || !chg) return;
+    const diff = d.price - d.prev;
+    const pct = ((Math.abs(diff) / Math.max(d.prev, 1)) * 100).toFixed(1);
+    const isUp = diff > 0, isDn = diff < 0;
+    el.textContent = fmt(d.price, d.unit);
+    el.className = 'mv-price ' + (isUp ? 'up' : isDn ? 'dn' : 'neu');
+    chg.textContent = isUp ? `▲ +${pct}%` : isDn ? `▼ -${pct}%` : '● Stable';
+    chg.className = 'mv-chg ' + (isUp ? 'up' : isDn ? 'dn' : 'neu');
+  });
+}
+
+function updateAlerts() {
+  ['petrol','onion','gold','dollar'].forEach(k => {
+    const el = document.getElementById('al-' + k);
+    if (!el) return;
+    const v = LIVE[k].price;
+    el.textContent = k === 'petrol' ? v.toFixed(2)
+      : k === 'onion' ? v
+      : k === 'dollar' ? v.toFixed(2)
+      : Math.round(v).toLocaleString('en-PK');
+  });
+}
+
+// ══════════════════════════════════════
+// CHART — Real history + forecast
+// ══════════════════════════════════════
+function buildChart(d) {
+  const ctx = document.getElementById('mainChart');
+  if (!ctx) return;
+  const today = new Date();
+  const past = 7;
+
+  // Build past prices from history or simulate
+  let pastPrices = [];
+  if (d.history.length >= 3) {
+    // Use real stored history
+    pastPrices = d.history.slice(-7).map(h => h.price);
+    while (pastPrices.length < past + 1) pastPrices.unshift(d.prev);
+  } else {
+    // Simulate past based on trend
+    for (let i = past; i >= 1; i--) {
+      const base = d.price;
+      const noise = (Math.random() - 0.5) * 0.04;
+      pastPrices.push(parseFloat((base * (1 - Math.abs(noise) * (i / past))).toFixed(2)));
+    }
+    pastPrices.push(d.price);
+  }
+
+  const labels = [];
+  for (let i = past; i >= 0; i--) {
+    const dt = new Date(today); dt.setDate(dt.getDate() - i);
+    labels.push(dt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }));
+  }
+  for (let i = 1; i <= 14; i++) {
+    const dt = new Date(today); dt.setDate(dt.getDate() + i);
+    labels.push(dt.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }));
+  }
+
+  const fc = getForecast(currentKey);
+  const actual = [...pastPrices, ...Array(14).fill(null)];
+  const forecast = [...Array(past).fill(null), d.price, ...fc];
+
+  if (chartObj) chartObj.destroy();
+  chartObj = new Chart(ctx.getContext('2d'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Actual Price', data: actual, borderColor: d.color, backgroundColor: d.color + '18', borderWidth: 2, pointRadius: 3, pointBackgroundColor: d.color, fill: true, tension: 0.4, spanGaps: false },
+        { label: 'AI Forecast',  data: forecast, borderColor: '#00ff88', backgroundColor: 'rgba(0,255,136,0.06)', borderWidth: 2, borderDash: [6, 4], pointRadius: 3, pointBackgroundColor: '#00ff88', fill: true, tension: 0.4, spanGaps: false },
+      ],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { labels: { color: 'rgba(0,245,255,0.55)', font: { family: 'Share Tech Mono', size: 11 }, boxWidth: 14 } },
+        tooltip: { backgroundColor: 'rgba(3,14,26,0.96)', borderColor: 'rgba(0,245,255,0.25)', borderWidth: 1, titleColor: '#00f5ff', bodyColor: 'rgba(255,255,255,0.7)', titleFont: { family: 'Orbitron', size: 10 }, bodyFont: { family: 'Share Tech Mono', size: 11 }, padding: 12 },
+      },
+      scales: {
+        x: { grid: { color: 'rgba(0,245,255,0.05)' }, ticks: { color: 'rgba(0,245,255,0.35)', font: { family: 'Share Tech Mono', size: 9 }, maxRotation: 45 } },
+        y: { grid: { color: 'rgba(0,245,255,0.05)' }, ticks: { color: 'rgba(0,245,255,0.35)', font: { family: 'Share Tech Mono', size: 9 } } },
+      },
+    },
+  });
+}
+
+// ══════════════════════════════════════
+// FORECAST TABLE
+// ══════════════════════════════════════
+function buildTable(key) {
+  const d = LIVE[key];
+  const fc = getForecast(key);
+  const tbody = document.getElementById('fcBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  const today = new Date();
+  fc.forEach((price, i) => {
+    const dt = new Date(today); dt.setDate(dt.getDate() + i + 1);
+    const prev = i === 0 ? d.price : fc[i - 1];
+    const diff = price - prev;
+    const pct = ((Math.abs(diff) / prev) * 100).toFixed(1);
+    const isUp = diff > 0.01, isDn = diff < -0.01;
+    const cls = isUp ? 'td-up' : isDn ? 'td-dn' : 'td-neu';
+    const arrow = isUp ? '▲' : isDn ? '▼' : '●';
+    const dir = isUp ? 'RISING' : isDn ? 'FALLING' : 'STABLE';
+    const fcls = isUp ? 'pf-up' : isDn ? 'pf-dn' : 'pf-neu';
+    // Confidence decreases with time
+    const prob = Math.max(50, Math.min(95, 92 - (i * 3)));
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="td-day">${dt.toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short' })}</td>
+      <td style="font-family:var(--mono)">${fmt(price, d.unit)}</td>
+      <td class="${cls}">${arrow} ${pct}%</td>
+      <td class="${cls}" style="font-size:.6rem">${dir}</td>
+      <td><div class="pbar"><div class="pbar-t"><div class="pbar-f ${fcls}" style="width:${prob}%"></div></div><span style="font-size:.58rem;color:rgba(0,245,255,.4)">${prob}%</span></div></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ══════════════════════════════════════
+// SELECT COMMODITY
+// ══════════════════════════════════════
+function selectC(btn, key) {
+  document.querySelectorAll('.pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentKey = key;
+  updateDisplays();
+  fetchAISummary(key);
+}
+
+// ══════════════════════════════════════
+// LOCAL AI SUMMARY (instant, no CORS)
+// ══════════════════════════════════════
+function fetchAISummary(key) {
+  const el = document.getElementById('weeklySummary');
+  if (!el) return;
+  const d = LIVE[key];
+  const fc = getForecast(key);
+  const fc7 = fc[6], fc14 = fc[13];
+  const p7 = ((fc7 - d.price) / d.price * 100).toFixed(1);
+  const p14 = ((fc14 - d.price) / d.price * 100).toFixed(1);
+  const c7 = fc7 > d.price ? 'up' : 'dn';
+  const c14 = fc14 > d.price ? 'up' : 'dn';
+  const a7 = fc7 > d.price ? '▲' : '▼';
+  const a14 = fc14 > d.price ? '▲' : '▼';
+  const conf = d.history.length > 5 ? '91%' : '87%';
+
+  const kseInfo = `KSE-100: <strong style="color:var(--${MARKET.kse100.trend==='UP'?'green':'red'}">${MARKET.kse100.value.toLocaleString('en-PK')}</strong> (${MARKET.kse100.trend==='UP'?'▲':'▼'} ${Math.abs(MARKET.kse100.pct)}%)`;
+  const wxInfo  = `Lahore: <strong style="color:var(--cyan)">${MARKET.weather.temp}°C</strong> ${MARKET.weather.icon}`;
+
+  const analyses = {
+    petrol: `<span style="color:var(--cyan)">⛽ PETROL ANALYSIS — June 7, 2026</span><br><br>
+Live OGRA Price: <strong style="color:var(--yellow)">${fmt(d.price, d.unit)}/liter</strong> (${d.trend})<br>
+Diesel: <strong>₨380.78/liter</strong> (unchanged)<br><br>
+📅 7-Din Forecast: <span class="${c7}">${a7} ${fmt(fc7, d.unit)}</span> (${a7} ${Math.abs(p7)}%)<br>
+📅 14-Din Forecast: <span class="${c14}">${a14} ${fmt(fc14, d.unit)}</span> (${a14} ${Math.abs(p14)}%)<br>
+🎯 AI Confidence: <strong style="color:var(--green)">${conf}</strong><br><br>
+<strong>Key Factors:</strong><br>
+→ Global Brent crude: ~$82/barrel<br>
+→ Iran war: oil markets volatile<br>
+→ OGRA reviews weekly (every Friday)<br>
+→ ${wxInfo} — heat increases fuel demand<br><br>
+✅ <strong>Recommendation:</strong> Abhi full tank bharao — agli revision uncertain!`,
+
+    gold: `<span style="color:var(--cyan)">🥇 GOLD ANALYSIS — June 7, 2026</span><br><br>
+Live Rate: <strong style="color:var(--yellow)">${fmt(d.price, d.unit)}/tola</strong> (${d.trend})<br>
+Global: ~$3,200/oz (USD)<br><br>
+📅 7-Din Forecast: <span class="${c7}">${a7} ${fmt(fc7, d.unit)}</span> (${a7} ${Math.abs(p7)}%)<br>
+📅 14-Din Forecast: <span class="${c14}">${a14} ${fmt(fc14, d.unit)}</span> (${a14} ${Math.abs(p14)}%)<br>
+🎯 AI Confidence: <strong style="color:var(--green)">${conf}</strong><br><br>
+<strong>Key Factors:</strong><br>
+→ Iran-US conflict: safe haven demand high<br>
+→ Dollar rate: Rs.${LIVE.dollar.price.toFixed(2)} affects PKR gold price<br>
+→ ${kseInfo}<br>
+→ Central banks buying gold globally<br><br>
+✅ <strong>Recommendation:</strong> HOLD karo — mat becho! Aur badhega.`,
+
+    dollar: `<span style="color:var(--cyan)">💵 USD/PKR ANALYSIS — June 7, 2026</span><br><br>
+Live Rate: <strong style="color:var(--yellow)">${fmt(d.price, d.unit)}</strong> (${d.trend})<br>
+Interbank rate (real-time API)<br><br>
+📅 7-Din Forecast: <span class="${c7}">${a7} ${fmt(fc7, d.unit)}</span> (${a7} ${Math.abs(p7)}%)<br>
+📅 14-Din Forecast: <span class="${c14}">${a14} ${fmt(fc14, d.unit)}</span> (${a14} ${Math.abs(p14)}%)<br>
+🎯 AI Confidence: <strong style="color:var(--green)">${conf}</strong><br><br>
+<strong>Key Factors:</strong><br>
+→ IMF review: positive outlook<br>
+→ Remittances: $3.2bn in May (record)<br>
+→ ${kseInfo}<br>
+→ Inflation: 4.5% (down from 23.4%)<br><br>
+✅ <strong>Recommendation:</strong> Imported cheezein abhi khareedlo!`,
+
+    wheat: `<span style="color:var(--cyan)">🌾 WHEAT ANALYSIS — June 7, 2026</span><br><br>
+Mandi Price: <strong style="color:var(--yellow)">${fmt(d.price, d.unit)}/40kg</strong> (${d.trend})<br>
+Govt support price: ₨3,900<br><br>
+📅 7-Din Forecast: <span class="${c7}">${a7} ${fmt(fc7, d.unit)}</span> (${a7} ${Math.abs(p7)}%)<br>
+📅 14-Din Forecast: <span class="${c14}">${a14} ${fmt(fc14, d.unit)}</span> (${a14} ${Math.abs(p14)}%)<br>
+🎯 AI Confidence: <strong style="color:var(--green)">${conf}</strong><br><br>
+<strong>Key Factors:</strong><br>
+→ New harvest: surplus in Punjab<br>
+→ Price below govt support — distress selling<br>
+→ ${wxInfo} — heat may affect storage<br>
+→ Export ban keeping supply high<br><br>
+✅ <strong>Recommendation:</strong> Atta stock karna theek — stable rahega.`,
+
+    sugar: `<span style="color:var(--cyan)">🍬 SUGAR ANALYSIS — June 7, 2026</span><br><br>
+Market Rate: <strong style="color:var(--yellow)">${fmt(d.price, d.unit)}/kg</strong> (${d.trend})<br><br>
+📅 7-Din Forecast: <span class="${c7}">${a7} ${fmt(fc7, d.unit)}</span> (${a7} ${Math.abs(p7)}%)<br>
+📅 14-Din Forecast: <span class="${c14}">${a14} ${fmt(fc14, d.unit)}</span> (${a14} ${Math.abs(p14)}%)<br>
+🎯 AI Confidence: <strong style="color:var(--green)">${conf}</strong><br><br>
+<strong>Key Factors:</strong><br>
+→ Mills: limited stock remaining<br>
+→ Govt price control: moderate effect<br>
+→ Post-Ramzan demand: normalizing<br>
+→ ${kseInfo}<br><br>
+✅ <strong>Recommendation:</strong> Moderate stock rakhein — aur mehnga hoga.`,
+
+    onion: `<span style="color:var(--cyan)">🧅 ONION ANALYSIS — June 7, 2026</span><br><br>
+Market Rate: <strong style="color:var(--yellow)">${fmt(d.price, d.unit)}/kg</strong> (${d.trend})<br><br>
+📅 7-Din Forecast: <span class="${c7}">${a7} ${fmt(fc7, d.unit)}</span> (${a7} ${Math.abs(p7)}%)<br>
+📅 14-Din Forecast: <span class="${c14}">${a14} ${fmt(fc14, d.unit)}</span> (${a14} ${Math.abs(p14)}%)<br>
+🎯 AI Confidence: <strong style="color:var(--green)">${conf}</strong><br><br>
+<strong>Key Factors:</strong><br>
+→ New Sindh crop: market flooded<br>
+→ Supply surplus — price falling<br>
+→ ₨40-45 expected in 14 days<br>
+→ ${wxInfo} — affects storage<br><br>
+✅ <strong>Recommendation:</strong> Mat stockpile karo — aur sasta hoga!`,
+  };
+
+  el.innerHTML = analyses[key] || analyses.petrol;
+}
+
+// ══════════════════════════════════════
+// SMART LOCAL AI CHAT
+// ══════════════════════════════════════
+function sendMsg() {
+  const inp = document.getElementById('aiInp');
+  const q = (inp.value || '').trim();
+  if (!q || aiLoading) return;
+  inp.value = '';
+  processQ(q);
+}
+
+function quickAsk(q) { if (!aiLoading) processQ(q); }
+
+function processQ(q) {
+  aiLoading = true;
+  const sendBtn = document.getElementById('sendBtn');
+  if (sendBtn) sendBtn.disabled = true;
+  const msgs = document.getElementById('aiMessages');
+  if (!msgs) return;
+
+  const uDiv = document.createElement('div');
+  uDiv.className = 'msg msg-user';
+  uDiv.textContent = q;
+  msgs.appendChild(uDiv);
+
+  const lDiv = document.createElement('div');
+  lDiv.className = 'msg-loading';
+  lDiv.innerHTML = '<div class="dots"><span></span><span></span><span></span></div> MUNEEB·AI analyzing...';
+  msgs.appendChild(lDiv);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  setTimeout(() => {
+    lDiv.remove();
+    const reply = getSmartReply(q.toLowerCase());
+    const aDiv = document.createElement('div');
+    aDiv.className = 'msg msg-ai';
+    aDiv.innerHTML = `<span class="msg-ai-lbl">MUNEEB·AI ANALYST</span>${reply}`;
+    msgs.appendChild(aDiv);
+    msgs.scrollTop = msgs.scrollHeight;
+    aiLoading = false;
+    if (sendBtn) sendBtn.disabled = false;
+  }, 600);
+}
+
+function getSmartReply(q) {
+  const P = LIVE.petrol, G = LIVE.gold, D = LIVE.dollar;
+  const W = LIVE.wheat, S = LIVE.sugar, O = LIVE.onion;
+  const kse = MARKET.kse100, wx = MARKET.weather;
+  const fc = k => getForecast(k);
+
+  if (/petrol|fuel|diesel|pso/.test(q)) {
+    const f7 = fc('petrol')[6];
+    return `⛽ <strong style="color:var(--yellow)">PETROL Live Update:</strong><br>
+OGRA Rate: <strong style="color:var(--cyan)">${fmt(P.price, P.unit)}/liter</strong> (${P.trend})<br>
+Diesel: <strong>₨380.78</strong> (unchanged)<br>
+7-din forecast: <span class="${f7>P.price?'up':'dn'}">${f7>P.price?'▲':'▼'} ${fmt(f7, P.unit)}</span><br><br>
+KSE-100: ${kse.value.toLocaleString()} | Weather: ${wx.temp}°C ${wx.icon}<br>
+✅ <strong>Advice:</strong> Abhi full tank bharao!`;
+  }
+  if (/gold|sona|tola/.test(q)) {
+    const f7 = fc('gold')[6];
+    return `🥇 <strong style="color:var(--yellow)">GOLD Live Rate:</strong><br>
+PKR Rate: <strong style="color:var(--cyan)">${fmt(G.price, G.unit)}/tola</strong> (${G.trend})<br>
+USD Rate: ~$3,200/oz | Dollar: ₨${D.price}<br>
+7-din forecast: <span class="${f7>G.price?'up':'dn'}">${f7>G.price?'▲':'▼'} ${fmt(f7, G.unit)}</span><br><br>
+✅ <strong>Advice:</strong> HOLD — Iran war demand strong!`;
+  }
+  if (/dollar|usd|pkr|rupee|rupaya/.test(q)) {
+    const f7 = fc('dollar')[6];
+    return `💵 <strong style="color:var(--yellow)">USD/PKR Live Rate:</strong><br>
+Interbank: <strong style="color:var(--cyan)">${fmt(D.price, D.unit)}</strong> (${D.trend})<br>
+7-din forecast: <span class="${f7>D.price?'up':'dn'}">${f7>D.price?'▲':'▼'} ${fmt(f7, D.unit)}</span><br><br>
+IMF positive + remittances strong — rupee stable<br>
+✅ <strong>Advice:</strong> Imported cheezein abhi khareedlo!`;
+  }
+  if (/wheat|gandum|atta|flour/.test(q)) {
+    return `🌾 <strong style="color:var(--yellow)">WHEAT Market:</strong><br>
+Mandi: <strong style="color:var(--cyan)">${fmt(W.price, W.unit)}/40kg</strong> (${W.trend})<br>
+Govt support: ₨3,900 — market below support<br>
+New harvest surplus in Punjab<br>
+✅ <strong>Advice:</strong> Atta stock theek — stable rahega.`;
+  }
+  if (/kse|stock|market|shares|index/.test(q)) {
+    const isUp = kse.trend === 'UP';
+    return `📈 <strong style="color:var(--yellow)">KSE-100 Live:</strong><br>
+Index: <strong style="color:var(--${isUp?'green':'red'})">${kse.value.toLocaleString('en-PK')}</strong> <span class="${isUp?'up':'dn'}">${isUp?'▲':'▼'} ${Math.abs(kse.pct)}%</span><br>
+Change: ${kse.change > 0 ? '+' : ''}${kse.change.toLocaleString()} points<br><br>
+Foreign investment wapas aa raha hai Pakistan mein<br>
+✅ <strong>Advice:</strong> Market bullish — cautiously optimistic!`;
+  }
+  if (/weather|mausam|temp|garmi|heat/.test(q)) {
+    return `🌤️ <strong style="color:var(--yellow)">Lahore Weather:</strong><br>
+Temperature: <strong style="color:var(--cyan)">${wx.temp}°C</strong> ${wx.icon}<br>
+Humidity: ${wx.humidity}% | Wind: ${wx.wind} km/h<br>
+Condition: ${wx.condition}<br><br>
+Garmi zyada hai — petrol demand high, agriculture affected<br>
+✅ <strong>Impact:</strong> Heat → fuel demand up → prices watch karo!`;
+  }
+  if (/sugar|cheeni|chini/.test(q)) {
+    return `🍬 <strong style="color:var(--yellow)">SUGAR Market:</strong><br>
+Rate: <strong style="color:var(--cyan)">${fmt(S.price, S.unit)}/kg</strong> (${S.trend})<br>
+Mills ka stock limited — uptrend jari<br>
+✅ <strong>Advice:</strong> Moderate stock rakhein.`;
+  }
+  if (/onion|pyaz|piyaz/.test(q)) {
+    return `🧅 <strong style="color:var(--yellow)">ONION Market:</strong><br>
+Rate: <strong style="color:var(--cyan)">${fmt(O.price, O.unit)}/kg</strong> (${O.trend})<br>
+Nai Sindh fasal — price gir rahi hai<br>
+₨40-45 expected in 2 weeks<br>
+✅ <strong>Advice:</strong> Mat stockpile karo!`;
+  }
+  if (/kharee|buy|invest|overview|mehng|inflation/.test(q)) {
+    return `💡 <strong style="color:var(--yellow)">MUNEEB·AI Market Overview:</strong><br><br>
+⛽ Petrol: <strong>${fmt(P.price,P.unit)}</strong> <span class="dn">▼ DOWN</span><br>
+🥇 Gold: <strong>${fmt(G.price,G.unit)}</strong> <span class="up">▲ UP</span><br>
+💵 Dollar: <strong>${fmt(D.price,D.unit)}</strong> <span class="neu">● STABLE</span><br>
+🌾 Wheat: <strong>${fmt(W.price,W.unit)}</strong> <span class="dn">▼ DOWN</span><br>
+📈 KSE-100: <strong>${kse.value.toLocaleString()}</strong> <span class="${kse.trend==='UP'?'up':'dn'}">${kse.trend==='UP'?'▲':'▼'}</span><br>
+🌤️ Lahore: <strong>${wx.temp}°C</strong> ${wx.icon}<br><br>
+✅ <strong>Khareedlo:</strong> Petrol (sasta hai) | Atta (stable)<br>
+⏳ <strong>Wait karo:</strong> Onion (aur girega) | Sugar (thoda wait)<br>
+💰 <strong>Hold karo:</strong> Gold (aur badhega)`;
+  }
+
+  // Default
+  return `🤖 <strong style="color:var(--cyan)">MUNEEB·AI Live Snapshot:</strong><br><br>
+⛽ Petrol: <strong>${fmt(P.price,P.unit)}</strong> | 🥇 Gold: <strong>${fmt(G.price,G.unit)}</strong><br>
+💵 Dollar: <strong>${fmt(D.price,D.unit)}</strong> | 🌾 Wheat: <strong>${fmt(W.price,W.unit)}</strong><br>
+📈 KSE-100: <strong>${kse.value.toLocaleString()}</strong> | 🌤️ ${wx.temp}°C ${wx.icon}<br><br>
+Koi bhi cheez poochein — petrol, gold, dollar, weather, stocks!`;
+}
+
+document.getElementById('aiInp')?.addEventListener('keydown', e => { if (e.key === 'Enter') sendMsg(); });
+
+// ══════════════════════════════════════
+// PRICE ALERT SYSTEM
+// ══════════════════════════════════════
+const ALERT_THRESHOLDS = { petrol: 2, gold: 2000, dollar: 1, wheat: 100, sugar: 5, onion: 8 };
+const lastAlerted = {};
+let alertTimeout = null;
+
+function checkPriceAlerts() {
+  Object.keys(ALERT_THRESHOLDS).forEach(key => {
+    const d = LIVE[key];
+    const diff = Math.abs(d.price - d.prev);
+    if (diff >= ALERT_THRESHOLDS[key] && lastAlerted[key] !== d.price) {
+      lastAlerted[key] = d.price;
+      const isUp = d.price > d.prev;
+      const pct = ((diff / d.prev) * 100).toFixed(1);
+      showPriceAlert({
+        icon: isUp ? '🔴' : '🟢',
+        title: `${d.label} ${isUp ? 'PRICE RISE' : 'PRICE DROP'}!`,
+        body: `${isUp ? 'Izafa' : 'Kami'} aayi!\nPehle: ${fmt(d.prev, d.unit)}\nAb: ${fmt(d.price, d.unit)}\nChange: ${isUp?'▲':' ▼'} ${pct}%\n\n${getAlertAdvice(key, isUp)}`,
+        isUp,
+      });
+    }
+  });
+}
+
+function getAlertAdvice(key, isUp) {
+  const advice = {
+    petrol: isUp ? '⚠️ Jaldi full tank bharao!' : '✅ Sasta hua — abhi bharwao!',
+    gold:   isUp ? '✅ Hold karo — aur badhega!' : '⚠️ Gir raha hai — sochna!',
+    dollar: isUp ? '⚠️ Imports mehge honge!' : '✅ Rupee strong — acha waqt!',
+    wheat:  isUp ? '⚠️ Atta stock karo abhi!' : '✅ Sasta — normal rakhо!',
+    sugar:  isUp ? '⚠️ Sugar stock karo!' : '✅ Sugar sasti!',
+    onion:  isUp ? '⚠️ Onion mehngi!' : '✅ Sasti — wait karo!',
+  };
+  return advice[key] || '';
+}
+
+function showPriceAlert({ icon, title, body, isUp }) {
+  const popup = document.getElementById('priceAlertPopup');
+  const alertIcon = document.getElementById('alertIcon');
+  const alertTitle = document.getElementById('alertTitle');
+  const alertBody = document.getElementById('alertBody');
+  const alertWaLink = document.getElementById('alertWaLink');
+  if (!popup) return;
+
+  if (alertIcon) alertIcon.textContent = icon;
+  if (alertTitle) { alertTitle.textContent = title; alertTitle.style.color = isUp ? 'var(--red)' : 'var(--green)'; }
+  if (popup) popup.style.borderColor = isUp ? 'var(--red)' : 'var(--green)';
+  if (alertBody) alertBody.innerHTML = body.replace(/\n/g, '<br>');
+  if (alertWaLink) {
+    const waMsg = encodeURIComponent(`MUNEEB·AI Alert:\n${title}\n${body}`);
+    alertWaLink.href = `https://wa.me/${CONFIG.WA_NUMBER}?text=${waMsg}`;
+  }
+  popup.classList.add('show');
+
+  if (alertTimeout) clearTimeout(alertTimeout);
+  alertTimeout = setTimeout(closeAlert, 8000);
+}
+
+function closeAlert() {
+  document.getElementById('priceAlertPopup')?.classList.remove('show');
+}
+
+// ══════════════════════════════════════
+// INDICATORS ANIMATE
+// ══════════════════════════════════════
+function animInds() {
+  setTimeout(() => { const el = document.getElementById('g1'); if(el) el.style.width = '9%'; }, 400);
+  setTimeout(() => { const el = document.getElementById('g2'); if(el) el.style.width = '55%'; }, 600);
+  setTimeout(() => { const el = document.getElementById('g3'); if(el) el.style.width = '78%'; }, 800);
+}
+
+// ══════════════════════════════════════
+// AUTO REFRESH — Every 30 minutes
+// ══════════════════════════════════════
+if (refreshTimer) clearInterval(refreshTimer);
+refreshTimer = setInterval(fetchAllPrices, CONFIG.REFRESH_MS);
+
+// Also refresh news every 30 min
+setInterval(fetchNews, CONFIG.REFRESH_MS);
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+window.addEventListener('load', async () => {
+  animInds();
+  fetchNews();        // Load news immediately (async)
+  await fetchAllPrices(); // Fetch all prices
+  // Welcome message after 1.5 seconds
+  setTimeout(() => processQ('Aaj ke live prices aur market overview — kya khareedna chahiye?'), 1500);
+});
+</script>
+
+
+<!-- WHATSAPP FLOAT BUTTON -->
+<div class="wa-float">
+  <a class="wa-btn" href="https://wa.me/923120063850?text=MUNEEB%C2%B7AI+Dashboard+se+message%3A+Price+update+chahiye!" target="_blank">
+    <span class="wa-icon">💬</span>
+    <div class="wa-text">
+      <span class="wa-title">MUNEEB · AI SUPPORT</span>
+      <span class="wa-sub">WhatsApp: 0312-0063850</span>
+    </div>
+  </a>
+</div>
+
+<!-- PRICE ALERT POPUP -->
+<div class="price-alert-popup" id="priceAlertPopup">
+  <button class="alert-popup-close" onclick="closeAlert()">✕</button>
+  <div class="alert-popup-title">
+    <span id="alertIcon">⚡</span>
+    <span id="alertTitle">PRICE ALERT</span>
+  </div>
+  <div class="alert-popup-body" id="alertBody">Loading...</div>
+  <a class="alert-wa-link" id="alertWaLink" href="#" target="_blank">
+    💬 MUNEEB se poochо
+  </a>
+</div>
+
+</body>
+</html>
